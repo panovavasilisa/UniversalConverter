@@ -45,7 +45,7 @@ bool BigInteger::isZero() const {
     return (number.size() == 1 && number[0] == 0);
 }
 
-string BigInteger::toString() const {
+string BigInteger::toString() {
     if (isZero()) return "0";
     string res;
     res += to_string(number.back());
@@ -57,7 +57,7 @@ string BigInteger::toString() const {
     return res;
 }
 
-bool BigInteger::operator==(const BigInteger& other) const {
+bool BigInteger::operator==(const BigInteger& other) const{
     if (number.size() != other.number.size()) return false;
     for (size_t i = 0; i < number.size(); ++i) {
         if (number[i] != other.number[i]) return false;
@@ -65,11 +65,11 @@ bool BigInteger::operator==(const BigInteger& other) const {
     return true;
 }
 
-bool BigInteger::operator!=(const BigInteger& other) const {
+bool BigInteger::operator!=(const BigInteger& other) const{
     return !(*this == other);
 }
 
-bool BigInteger::operator<(const BigInteger& other) const {
+bool BigInteger::operator<(const BigInteger& other) const{
     if (number.size() != other.number.size())
         return number.size() < other.number.size();
     for (int i = (int)number.size() - 1; i >= 0; --i) {
@@ -79,15 +79,15 @@ bool BigInteger::operator<(const BigInteger& other) const {
     return false;
 }
 
-bool BigInteger::operator<=(const BigInteger& other) const {
+bool BigInteger::operator<=(const BigInteger& other) const{
     return (*this < other) || (*this == other);
 }
 
-bool BigInteger::operator>(const BigInteger& other) const {
+bool BigInteger::operator>(const BigInteger& other) const{
     return !(*this <= other);
 }
 
-bool BigInteger::operator>=(const BigInteger& other) const {
+bool BigInteger::operator>=(const BigInteger& other) const{
     return !(*this < other);
 }
 
@@ -111,7 +111,7 @@ BigInteger& BigInteger::operator+=(const BigInteger& other) {
     return *this;
 }
 
-BigInteger BigInteger::operator+(const BigInteger& other) const {
+BigInteger BigInteger::operator+(const BigInteger& other) const{
     BigInteger result = *this;
     result += other;
     return result;
@@ -140,7 +140,7 @@ BigInteger& BigInteger::operator-=(const BigInteger& other) {
     return *this;
 }
 
-BigInteger BigInteger::operator-(const BigInteger& other) const {
+BigInteger BigInteger::operator-(const BigInteger& other) const{
     BigInteger result = *this;
     result -= other;
     return result;
@@ -164,9 +164,152 @@ BigInteger& BigInteger::operator*=(unsigned int x) {
     return *this;
 }
 
-BigInteger BigInteger::operator*(unsigned int x) const {
+BigInteger BigInteger::operator*(unsigned int x) const{
     BigInteger result = *this;
     result *= x;
+    return result;
+}
+
+std::vector<long long> BigInteger::karatsuba(const std::vector<int>& a, const std::vector<int>& b) {
+    size_t n = std::max(a.size(), b.size());
+    if (n <= 64) {
+        std::vector<long long> res(2 * n, 0);
+        for (size_t i = 0; i < a.size(); ++i) {
+            for (size_t j = 0; j < b.size(); ++j) {
+                res[i + j] += (long long)a[i] * b[j];
+            }
+        }
+        long long carry = 0;
+        for (size_t i = 0; i < res.size(); ++i) {
+            res[i] += carry;
+            carry = res[i] / BASE;
+            res[i] %= BASE;
+        }
+        while (carry) {
+            res.push_back(carry % BASE);
+            carry /= BASE;
+        }
+        return res;
+    }
+    size_t k = n / 2;
+    std::vector<int> a_low(a.begin(), a.begin() + std::min(k, a.size()));
+    std::vector<int> a_high(a.begin() + std::min(k, a.size()), a.end());
+    std::vector<int> b_low(b.begin(), b.begin() + std::min(k, b.size()));
+    std::vector<int> b_high(b.begin() + std::min(k, b.size()), b.end());
+
+    a_low.resize(k, 0);
+    a_high.resize(k, 0);
+    b_low.resize(k, 0);
+    b_high.resize(k, 0);
+
+    std::vector<long long> ac = karatsuba(a_high, b_high);
+    std::vector<long long> bd = karatsuba(a_low, b_low);
+
+    std::vector<int> a_sum(k), b_sum(k);
+    for (size_t i = 0; i < k; ++i) {
+        a_sum[i] = a_low[i] + a_high[i];
+        b_sum[i] = b_low[i] + b_high[i];
+    }
+    // Нормализация сумм (переносы)
+    int carry = 0;
+    for (size_t i = 0; i < k; ++i) {
+        a_sum[i] += carry;
+        carry = a_sum[i] / BASE;
+        a_sum[i] %= BASE;
+    }
+    if (carry) a_sum.push_back(carry);
+    carry = 0;
+    for (size_t i = 0; i < k; ++i) {
+        b_sum[i] += carry;
+        carry = b_sum[i] / BASE;
+        b_sum[i] %= BASE;
+    }
+    if (carry) b_sum.push_back(carry);
+
+    std::vector<long long> sum_prod = karatsuba(a_sum, b_sum);
+
+    size_t max_size = std::max(std::max(bd.size(), sum_prod.size()), ac.size());
+    std::vector<long long> result(max_size + 2 * k, 0);
+
+    for (size_t i = 0; i < bd.size(); ++i) result[i] = bd[i];
+    for (size_t i = 0; i < ac.size(); ++i) result[i + 2 * k] += ac[i];
+    for (size_t i = 0; i < sum_prod.size(); ++i) {
+        long long val = sum_prod[i];
+        if (i < ac.size()) val -= ac[i];
+        if (i < bd.size()) val -= bd[i];
+        result[i + k] += val;
+    }
+
+    long long carry2 = 0;
+    for (size_t i = 0; i < result.size(); ++i) {
+        result[i] += carry2;
+        carry2 = result[i] / BASE;
+        result[i] %= BASE;
+    }
+    while (carry2) {
+        result.push_back(carry2 % BASE);
+        carry2 /= BASE;
+    }
+    while (result.size() > 1 && result.back() == 0) result.pop_back();
+    return result;
+}
+
+BigInteger& BigInteger::operator*=(const BigInteger& other) {
+    if (isZero() || other.isZero()) {
+        *this = BigInteger(0);
+        return *this;
+    }
+    std::vector<long long> res = karatsuba(number, other.number);
+    number.clear();
+    number.reserve(res.size());
+    for (long long v : res) number.push_back(static_cast<int>(v));
+    trim();
+    return *this;
+}
+
+
+
+/*BigInteger& BigInteger::operator*=(const BigInteger& other) {
+    if (isZero() || other.isZero()) {
+        *this = BigInteger(0);
+        return *this;
+    }
+    vector<long long> tmp(number.size() + other.number.size(), 0);
+    for (size_t i = 0; i < number.size(); ++i) {
+        uint64_t carry = 0;
+        for (size_t j = 0; j < other.number.size(); ++j) {
+            uint64_t prod = (uint64_t)number[i] * other.number[j] + tmp[i + j] + carry;
+            tmp[i + j] = prod % BASE;
+            carry = prod / BASE;
+        }
+        if (carry) tmp[i + other.number.size()] += carry;
+    }
+    uint64_t carry = 0;
+    for (size_t i = 0; i < tmp.size(); ++i) {
+        tmp[i] += carry;
+        carry = tmp[i] / BASE;
+        tmp[i] %= BASE;
+    }
+    while (carry) {
+        tmp.push_back(carry % BASE);
+        carry /= BASE;
+    }
+    number.clear();
+    number.reserve(tmp.size());
+    for (long long v : tmp) number.push_back((int)v);
+    trim();
+    return *this;
+}*/
+
+BigInteger BigInteger::operator*(const BigInteger& other) const{
+    BigInteger result = *this;
+    result *= other;
+    return result;
+}
+
+BigInteger BigInteger::operator/(unsigned int x) const{
+    BigInteger result = *this;
+    result /= x;
     return result;
 }
 
@@ -183,13 +326,7 @@ BigInteger& BigInteger::operator/=(unsigned int x) {
     return *this;
 }
 
-BigInteger BigInteger::operator/(unsigned int x) const {
-    BigInteger result = *this;
-    result /= x;
-    return result;
-}
-
-unsigned int BigInteger::operator%(unsigned int x) const {
+unsigned int BigInteger::operator%(unsigned int x) const{
     if (x == 0) throw runtime_error("деление на 0");
     uint64_t rem = 0;
     for (int i = (int)number.size() - 1; i >= 0; --i) {
@@ -198,114 +335,7 @@ unsigned int BigInteger::operator%(unsigned int x) const {
     return static_cast<unsigned int>(rem);
 }
 
-/*void BigInteger::karatsuba(int* a, int* b, long long* c, int n) {
-    if (n <= 64) {
-        for (int i = 0; i < n; ++i) {
-            for (int j = 0; j < n; ++j) {
-                c[i + j] += (long long)a[i] * b[j];
-            }
-        }
-        long long carry = 0;
-        for (int i = 0; i < 2 * n; ++i) {
-            c[i] += carry;
-            carry = c[i] / BASE;
-            c[i] %= BASE;
-        }
-        return;
-    }
-    int k = n / 2;
-    vector<int> l(k), r(k);
-    for (int i = 0; i < k; ++i) {
-        l[i] = a[i] + a[k + i];
-        r[i] = b[i] + b[k + i];
-    }
-    int carry = 0;
-    for (int i = 0; i < k; ++i) {
-        l[i] += carry;
-        carry = l[i] / BASE;
-        l[i] %= BASE;
-    }
-    carry = 0;
-    for (int i = 0; i < k; ++i) {
-        r[i] += carry;
-        carry = r[i] / BASE;
-        r[i] %= BASE;
-    }
-    vector<long long> ac(2 * k, 0);
-    vector<long long> bd(2 * k, 0);
-    vector<long long> t(2 * k, 0);
-    karatsuba(a + k, b + k, ac.data(), k);
-    karatsuba(a, b, bd.data(), k);
-    karatsuba(l.data(), r.data(), t.data(), k);
-    for (int i = 0; i < 2 * k; ++i) {
-        c[i] = bd[i];
-        c[2 * k + i] = ac[i];
-    }
-    for (int i = 0; i < 2 * k; ++i) {
-        long long val = t[i] - ac[i] - bd[i];
-        c[k + i] += val;
-    }
-    long long carry2 = 0;
-    for (int i = 0; i < 4 * k; ++i) {
-        c[i] += carry2;
-        carry2 = c[i] / BASE;
-        c[i] %= BASE;
-    }
-}*/
-
-
-BigInteger& BigInteger::operator*=(BigInteger& other) {
-    if (isZero() || other.isZero()) {
-        *this = BigInteger(0);
-        return *this;
-    }
-    size_t max_len = max(number.size(), other.number.size());
-    size_t n = 1;
-    while (n < max_len) n <<= 1;
-    int* a = new int[n]();
-    int* b = new int[n]();
-    for (size_t i = 0; i < number.size(); ++i) a[i] = number[i];
-    for (size_t i = 0; i < other.number.size(); ++i) b[i] = other.number[i];
-    long long* c = new long long[4 * n]();
-    karatsuba(a, b, c, (int)n);
-    vector<int> res;
-    uint64_t carry = 0;
-    for (int i = 0; i < 4 * n; ++i) {
-        uint64_t val = (uint64_t)c[i] + carry;
-        res.push_back((int)(val % BASE));
-        carry = val / BASE;
-    }
-    while (carry) {
-        res.push_back((int)(carry % BASE));
-        carry /= BASE;
-    }
-    delete[] a;
-    delete[] b;
-    delete[] c;
-    number.swap(res);
-    trim();
-    return *this;
-}
-
-BigInteger& BigInteger::operator*=(BigInteger& other) {
-    if (isZero() || other.isZero()) {
-        *this = BigInteger(0);
-        return *this;
-    }
-    vector<long long> res_digits = karatsuba(number, other.number);
-    number.clear();
-    number.reserve(res_digits.size());
-    for (long long v : res_digits) number.push_back(static_cast<int>(v));
-    trim();
-    return *this;
-}
-BigInteger BigInteger::operator*(BigInteger& other) {
-    BigInteger result = *this;
-    result *= other;
-    return result;
-}
-
-BigInteger BigInteger::operator/(BigInteger& other) {
+BigInteger BigInteger::operator/(const BigInteger& other) const{
     if (other.isZero()) throw runtime_error("Division by zero");
     if (isZero()) return BigInteger(0);
     if (*this < other) return BigInteger(0);
@@ -362,7 +392,7 @@ BigInteger BigInteger::operator/(BigInteger& other) {
     return quotient;
 }
 
-BigInteger BigInteger::operator%(BigInteger& other) {
+BigInteger BigInteger::operator%(const BigInteger& other) const{
     if (other.isZero()) throw runtime_error("Modulo by zero");
     if (*this < other) return *this;
     BigInteger quotient = *this / other;
@@ -381,9 +411,7 @@ BigInteger gcd(const BigInteger& a, const BigInteger& b) {
     return x;
 }
 
-
-
-BigInteger BigInteger::operator*(int x) const {
-    if (x < 0) throw std::runtime_error("Отрицательное умножение");
+BigInteger BigInteger::operator*(int x) const{
+    if (x < 0) throw runtime_error("Отрицательное умножение");
     return *this * static_cast<unsigned int>(x);
 }

@@ -13,35 +13,36 @@ public:
     BigInteger(string num);
 
     bool isZero() const;
-    string toString() const;
+    string toString();
     void trim();
 
     bool operator==(const BigInteger& other) const;
-    bool operator!=(const BigInteger& other) const;
-    bool operator<(const BigInteger& other) const;
-    bool operator<=(const BigInteger& other) const;
-    bool operator>(const BigInteger& other) const;
-    bool operator>=(const BigInteger& other) const;
+    bool operator!=(const BigInteger& other)const;
+    bool operator<(const BigInteger& other)const;
+    bool operator<=(const BigInteger& other)const;
+    bool operator>(const BigInteger& other)const;
+    bool operator>=(const BigInteger& other)const;
 
-    BigInteger operator+(const BigInteger& other) const;
+    BigInteger operator+(const BigInteger& other)const;
     BigInteger& operator+=(const BigInteger& other);
-    BigInteger operator-(const BigInteger& other) const;
+    BigInteger operator-(const BigInteger& other)const;
     BigInteger& operator-=(const BigInteger& other);
 
     BigInteger operator*(unsigned int x) const;
     BigInteger& operator*=(unsigned int x);
-    BigInteger operator*(BigInteger& other);
-    BigInteger& operator*=(BigInteger& other);
+    BigInteger operator*(const BigInteger& other) const;
+    BigInteger& operator*=(const BigInteger& other);
 
-    BigInteger operator/(unsigned int x) const;
+    BigInteger operator/(unsigned int x)const;
     BigInteger& operator/=(unsigned int x);
-    BigInteger operator/(BigInteger& other);
-    unsigned int operator%(unsigned int x) const;
-    BigInteger operator%(BigInteger& other);
+    BigInteger operator/(const BigInteger& other)const;
+    unsigned int operator%(unsigned int x)const;
+    BigInteger operator%(const BigInteger& other)const;
 
-    BigInteger operator*(int x) const;
+    BigInteger operator*(int x)const;
 
-    void karatsuba(int* a, int* b, long long* c, int n);
+    //void karatsuba(int* a, int* b, long long* c, int n);
+    static std::vector<long long> karatsuba(const std::vector<int>& a, const std::vector<int>& b);
 
 private:
     static const int BASE = 1000000000;

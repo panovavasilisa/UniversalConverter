@@ -1,56 +1,155 @@
-#ifndef BIGFRACTION_H
-#define BIGFRACTION_H
+#include "bigfraction.h"
+#include <stdexcept>
 
-#include "biginteger.h"
-#include <iostream>
+void BigFraction::checkDenZero(BigInteger& d) {
+    if (d.isZero()) throw std::logic_error("Denominator cannot be zero");
+}
 
-class BigFraction {
-public:
-    BigFraction();
-    BigFraction(const BigInteger& num, const BigInteger& den);
-    explicit BigFraction(const BigInteger& num);
-    explicit BigFraction(int num);
+BigFraction::BigFraction() : num(0), den(1) {}
 
-    bool isZero() const;                  // теперь можно, т.к. num.isZero() const
-    BigInteger getIntegerPart() const;
-    BigInteger getRemainder() const;
+BigFraction::BigFraction(const BigInteger& n, const BigInteger& d) : num(n), den(d) {
+    checkDenZero(den);
+    normalize();
+}
 
-    BigFraction operator-() const;
+BigFraction::BigFraction(const BigInteger& n) : num(n), den(1) {}
 
-    BigFraction operator+(const BigFraction& other) const;
-    BigFraction operator-(const BigFraction& other) const;
-    BigFraction operator*(const BigFraction& other) const;
-    BigFraction operator/(const BigFraction& other) const;
+BigFraction::BigFraction(int n) : num(n), den(1) {}
 
-    BigFraction& operator+=(const BigFraction& other);
-    BigFraction& operator-=(const BigFraction& other);
-    BigFraction& operator*=(const BigFraction& other);
-    BigFraction& operator/=(const BigFraction& other);
+bool BigFraction::isZero() {
+    return num.isZero();
+}
 
-    BigFraction operator+(int num) const;
-    BigFraction operator-(int num) const;
-    BigFraction operator*(int num) const;
-    BigFraction operator/(int num) const;
+BigInteger BigFraction::getIntegerPart() {
+    return num / den;
+}
 
-    friend BigFraction operator+(int num, const BigFraction& fr);
-    friend BigFraction operator-(int num, const BigFraction& fr);
-    friend BigFraction operator*(int num, const BigFraction& fr);
-    friend BigFraction operator/(int num, const BigFraction& fr);
+BigInteger BigFraction::getRemainder(){
+    return num % den;
+}
 
-    bool operator==(const BigFraction& other) const;
-    bool operator!=(const BigFraction& other) const;
-    bool operator<(const BigFraction& other) const;
-    bool operator<=(const BigFraction& other) const;
-    bool operator>(const BigFraction& other) const;
-    bool operator>=(const BigFraction& other) const;
+void BigFraction::normalize() {
+    if (den.isZero()) return;
+    if (den < 0) {
+        num = num * -1;
+        den = den * -1;
+    }
+    if (num.isZero()) {
+        den = 1;
+        return;
+    }
+    BigInteger g = gcd(num, den);
+    if (!g.isZero() && g != 1) {
+        num = num / g;
+        den = den / g;
+    }
+}
 
-    friend std::ostream& operator<<(std::ostream& out, const BigFraction& fr);
+BigFraction BigFraction::operator-() {
+    return BigFraction(num * -1, den);
+}
 
-private:
-    BigInteger num;
-    BigInteger den;
-    void normalize();
-    static void checkDenZero(const BigInteger& d);
-};
+BigFraction BigFraction::operator+(const BigFraction& other) const {
+    BigInteger newNum = num * other.den + den * other.num;
+    BigInteger newDen = den * other.den;
+    return BigFraction(newNum, newDen);
+}
 
-#endif
+BigFraction BigFraction::operator-(const BigFraction& other) const{
+    BigInteger newNum = num * other.den - other.num * den;
+    if (newNum < 0) newNum = BigInteger(0);
+    BigInteger newDen = den * other.den;
+    return BigFraction(newNum, newDen);
+}
+
+BigFraction BigFraction::operator*(const BigFraction& other) const{
+    BigInteger newNum = num * other.num;
+    BigInteger newDen = den * other.den;
+    return BigFraction(newNum, newDen);
+}
+
+BigFraction BigFraction::operator/(const BigFraction& other) const{
+    if (other.num.isZero()) throw std::logic_error("Division by zero");
+    BigInteger newNum = num * other.den;
+    BigInteger newDen = den * other.num;
+    return BigFraction(newNum, newDen);
+}
+
+BigFraction& BigFraction::operator+=(const BigFraction& other) {
+    *this = *this + other;
+    return *this;
+}
+
+BigFraction& BigFraction::operator-=(const BigFraction& other) {
+    *this = *this - other;
+    return *this;
+}
+
+BigFraction& BigFraction::operator*=(const BigFraction& other) {
+    *this = *this * other;
+    return *this;
+}
+
+BigFraction& BigFraction::operator/=(const BigFraction& other) {
+    *this = *this / other;
+    return *this;
+}
+
+BigFraction BigFraction::operator+(int num) const{
+    return *this + BigFraction(num);
+}
+
+BigFraction BigFraction::operator-(int num) const{
+    return *this - BigFraction(num);
+}
+
+BigFraction BigFraction::operator*(int num) const{
+    return *this * BigFraction(num);
+}
+
+BigFraction BigFraction::operator/(int num) const{
+    if (num == 0) throw std::logic_error("Division by zero");
+    return *this / BigFraction(num);
+}
+
+BigFraction operator+(int num, const BigFraction& fr) {
+    return (fr + num);
+}
+
+BigFraction operator-(int num, const BigFraction& fr) {
+    return BigFraction(num) - fr;
+}
+
+BigFraction operator*(int num, const BigFraction& fr) {
+    return fr * num;
+}
+
+BigFraction operator/(int num, const BigFraction& fr) {
+    if (fr.num.isZero()) throw std::logic_error("Division by zero");
+    return BigFraction(num) / fr;
+}
+
+bool BigFraction::operator==(const BigFraction& other) const {
+    return num * other.den == other.num * den;
+}
+
+bool BigFraction::operator!=(const BigFraction& other) const {
+    return !(*this == other);
+}
+
+bool BigFraction::operator<(const BigFraction& other) const {
+    return num * other.den < other.num * den;
+}
+
+bool BigFraction::operator<=(const BigFraction& other) const {
+    return !(*this > other);
+}
+
+bool BigFraction::operator>(const BigFraction& other) const {
+    return other < *this;
+}
+
+bool BigFraction::operator>=(const BigFraction& other) const {
+    return !(*this < other);
+}
+
