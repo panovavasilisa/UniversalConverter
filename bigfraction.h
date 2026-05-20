@@ -44,6 +44,8 @@ public:
     bool operator>(const BigFraction& other)const;
     bool operator>=(const BigFraction& other) const;
 
+    //BigInteger operator-() const;
+
 
 private:
     BigInteger num;

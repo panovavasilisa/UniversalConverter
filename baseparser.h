@@ -1,12 +1,12 @@
-#ifndef BASE_PARSER_H
-#define BASE_PARSER_H
+#ifndef BASEPARSER_H
+#define BASEPARSER_H
 
 #include "bigfraction.h"
 #include <string>
 
 class BaseParser {
 public:
-    static BigFraction parse(const string& input, int base);
+    static BigFraction parse(const std::string& input, int base);
 };
 
 #endif

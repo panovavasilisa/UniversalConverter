@@ -1,8 +1,9 @@
 #include "bigfraction.h"
+#include "biginteger.h"
 #include <stdexcept>
 
 void BigFraction::checkDenZero(BigInteger& d) {
-    if (d.isZero()) throw std::logic_error("Denominator cannot be zero");
+    if (d.isZero()) throw std::logic_error("знаменатель равен 0");
 }
 
 BigFraction::BigFraction() : num(0), den(1) {}
@@ -30,10 +31,6 @@ BigInteger BigFraction::getRemainder(){
 
 void BigFraction::normalize() {
     if (den.isZero()) return;
-    if (den < 0) {
-        num = num * -1;
-        den = den * -1;
-    }
     if (num.isZero()) {
         den = 1;
         return;
@@ -69,7 +66,7 @@ BigFraction BigFraction::operator*(const BigFraction& other) const{
 }
 
 BigFraction BigFraction::operator/(const BigFraction& other) const{
-    if (other.num.isZero()) throw std::logic_error("Division by zero");
+    if (other.num.isZero()) throw std::logic_error("деление на 0");
     BigInteger newNum = num * other.den;
     BigInteger newDen = den * other.num;
     return BigFraction(newNum, newDen);
@@ -108,7 +105,7 @@ BigFraction BigFraction::operator*(int num) const{
 }
 
 BigFraction BigFraction::operator/(int num) const{
-    if (num == 0) throw std::logic_error("Division by zero");
+    if (num == 0) throw std::logic_error("деление на 0");
     return *this / BigFraction(num);
 }
 
@@ -125,7 +122,7 @@ BigFraction operator*(int num, const BigFraction& fr) {
 }
 
 BigFraction operator/(int num, const BigFraction& fr) {
-    if (fr.num.isZero()) throw std::logic_error("Division by zero");
+    if (fr.num.isZero()) throw std::logic_error("деление на 0");
     return BigFraction(num) / fr;
 }
 
