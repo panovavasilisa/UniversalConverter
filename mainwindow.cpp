@@ -4,6 +4,7 @@
 #include <QDebug>
 #include "baseparser.h"
 #include "bigfraction.h"
+#include "baseconverter.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -44,14 +45,40 @@ void MainWindow::onCheckValid() {
     //QMessageBox::information(this, "Проверка", "Число введено (проверка ещё не реализована)");
 }
 
+
 void MainWindow::onCalculate() {
     QString numberStr = ui->line_my_number->text();
     QString pStr = ui->line_p->text();
     QString qStr = ui->line_q->text();
 
-    //qDebug() << "Конвертация: число =" << numberStr << "p =" << pStr << "q =" << qStr;
-    //BigInteger i(123);
-    BigFraction f(123, 1000);
+    bool pOk, qOk;
+    int p = pStr.toInt(&pOk);
+    int q = qStr.toInt(&qOk);
 
-    ui->line_ans_number->setText("Результат будет здесь");
+    if (!pOk || p < 2 || p > 500) {
+        ui->line_ans_number->setText("Ошибка: основание p должно быть целым от 2 до 500");
+        return;
+    }
+    if (!qOk || q < 2 || q > 500) {
+        ui->line_ans_number->setText("Ошибка: основание q должно быть целым от 2 до 500");
+        return;
+    }
+    if (numberStr.isEmpty()) {
+        ui->line_ans_number->setText("Ошибка: число не введено");
+        return;
+    }
+
+    try {
+        std::string inputStd = numberStr.toStdString();
+        BigFraction fraction = BaseParser::parse(inputStd, p);
+        std::pair<std::string, std::string> convResult = BaseConverter::convert(fraction, q);
+        std::string result = convResult.first;
+        std::string message = convResult.second;
+        ui->line_ans_number->setText(QString::fromStdString(result));
+        if (!message.empty()) {
+            ui->line_ans_number->append(QString::fromStdString("\n" + message));
+        }
+    } catch (const std::exception& e) {
+        ui->line_ans_number->setText(QString("Ошибка: ") + e.what());
+    }
 }

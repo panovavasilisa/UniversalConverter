@@ -9,6 +9,7 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    baseconverter.cpp \
     baseparser.cpp \
     bigfraction.cpp \
     biginteger.cpp \
@@ -16,6 +17,7 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
+    baseconverter.h \
     baseparser.h \
     bigfraction.h \
     biginteger.h \

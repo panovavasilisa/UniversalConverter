@@ -19,6 +19,7 @@
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
+#include <QtWidgets/QTextEdit>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -29,8 +30,6 @@ public:
     QWidget *centralwidget;
     QPushButton *btn_check_valid;
     QLineEdit *line_p;
-    QLineEdit *line_my_number;
-    QLineEdit *line_ans_number;
     QCommandLinkButton *btn_calculate;
     QLineEdit *line_q;
     QLabel *label_3;
@@ -38,6 +37,8 @@ public:
     QHBoxLayout *horizontalLayout;
     QLabel *label;
     QLabel *label_2;
+    QTextEdit *line_ans_number;
+    QLineEdit *line_my_number;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -46,26 +47,22 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName("MainWindow");
         MainWindow->resize(800, 600);
+        MainWindow->setIconSize(QSize(40, 40));
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName("centralwidget");
         btn_check_valid = new QPushButton(centralwidget);
         btn_check_valid->setObjectName("btn_check_valid");
-        btn_check_valid->setGeometry(QRect(130, 270, 81, 18));
+        btn_check_valid->setGeometry(QRect(130, 280, 81, 31));
         line_p = new QLineEdit(centralwidget);
         line_p->setObjectName("line_p");
-        line_p->setGeometry(QRect(120, 160, 31, 20));
-        line_my_number = new QLineEdit(centralwidget);
-        line_my_number->setObjectName("line_my_number");
-        line_my_number->setGeometry(QRect(130, 230, 211, 19));
-        line_ans_number = new QLineEdit(centralwidget);
-        line_ans_number->setObjectName("line_ans_number");
-        line_ans_number->setGeometry(QRect(470, 230, 211, 20));
+        line_p->setGeometry(QRect(220, 160, 31, 20));
         btn_calculate = new QCommandLinkButton(centralwidget);
         btn_calculate->setObjectName("btn_calculate");
-        btn_calculate->setGeometry(QRect(390, 220, 31, 41));
+        btn_calculate->setGeometry(QRect(380, 220, 41, 51));
+        btn_calculate->setIconSize(QSize(40, 40));
         line_q = new QLineEdit(centralwidget);
         line_q->setObjectName("line_q");
-        line_q->setGeometry(QRect(430, 170, 31, 20));
+        line_q->setGeometry(QRect(560, 160, 31, 20));
         label_3 = new QLabel(centralwidget);
         label_3->setObjectName("label_3");
         label_3->setGeometry(QRect(130, 90, 551, 61));
@@ -86,6 +83,12 @@ public:
 
         horizontalLayout->addWidget(label_2);
 
+        line_ans_number = new QTextEdit(centralwidget);
+        line_ans_number->setObjectName("line_ans_number");
+        line_ans_number->setGeometry(QRect(470, 230, 211, 31));
+        line_my_number = new QLineEdit(centralwidget);
+        line_my_number->setObjectName("line_my_number");
+        line_my_number->setGeometry(QRect(130, 230, 211, 31));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName("menubar");

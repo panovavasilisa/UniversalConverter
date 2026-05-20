@@ -150,3 +150,13 @@ bool BigFraction::operator>=(const BigFraction& other) const {
     return !(*this < other);
 }
 
+
+
+const BigInteger& BigFraction::GetNumerator() const {
+    return num;
+}
+
+const BigInteger& BigFraction::GetDenominator() const {
+    return den;
+}
+
