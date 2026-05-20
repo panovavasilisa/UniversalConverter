@@ -300,38 +300,6 @@ BigInteger& BigInteger::operator*=(const BigInteger& other) {
     return *this;
 }*/
 
-/*BigInteger& BigInteger::operator*=(const BigInteger& other) {
-    if (isZero() || other.isZero()) {
-        *this = BigInteger(0);
-        return *this;
-    }
-    vector<long long> tmp(number.size() + other.number.size(), 0);
-    for (size_t i = 0; i < number.size(); ++i) {
-        uint64_t carry = 0;
-        for (size_t j = 0; j < other.number.size(); ++j) {
-            uint64_t prod = (uint64_t)number[i] * other.number[j] + tmp[i + j] + carry;
-            tmp[i + j] = prod % BASE;
-            carry = prod / BASE;
-        }
-        if (carry) tmp[i + other.number.size()] += carry;
-    }
-    uint64_t carry = 0;
-    for (size_t i = 0; i < tmp.size(); ++i) {
-        tmp[i] += carry;
-        carry = tmp[i] / BASE;
-        tmp[i] %= BASE;
-    }
-    while (carry) {
-        tmp.push_back(carry % BASE);
-        carry /= BASE;
-    }
-    number.clear();
-    number.reserve(tmp.size());
-    for (long long v : tmp) number.push_back((int)v);
-    trim();
-    return *this;
-}*/
-
 BigInteger BigInteger::operator*(const BigInteger& other) const{
     BigInteger result = *this;
     result *= other;
@@ -460,7 +428,6 @@ BigInteger BigInteger::operator/(const BigInteger& other) const {
 BigInteger BigInteger::operator%(const BigInteger& other) const{
     if (other.isZero()) throw runtime_error("Modulo by zero");
     if (*this < other) return *this;
-    //std::cout << "JJJJJJJJJJ" << std::endl;
     BigInteger quotient = *this / other;
     BigInteger remainder = *this - (quotient * other);
     return remainder;
@@ -470,12 +437,9 @@ BigInteger gcd(const BigInteger& a, const BigInteger& b) {
     BigInteger x = a;
     BigInteger y = b;
     while (!y.isZero()) {
-        //std::cout << "AAAAA" << std::endl;
         BigInteger r = x % y;
-        //::cout << "BBB" << std::endl;
         x = y;
         y = r;
-        //std::cout << "GGG" << std::endl;
     }
     return x;
 }

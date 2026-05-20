@@ -18,6 +18,8 @@ public:
 private slots:
     void onCheckValid();
     void onCalculate();
+    void onLoadFile();
+    void onSaveFile();
 
 private:
     Ui::MainWindow *ui;
